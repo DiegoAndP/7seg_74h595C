@@ -1,0 +1,11 @@
+{
+  "additionalFiles": "..\\..\\..,..\\..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..",
+  "builtInToolsFolders": "",
+  "compiler.optimization_flags": "",
+  "customBuildProperties": "",
+  "fqbn": "arduino:avr:nano:cpu=atmega328",
+  "hardwareFolders": "C:\\Users\\Diego Andrade\\AppData\\Local\\Arduino15\\packages",
+  "otherLibrariesFolders": "D:\\Documentos\\Arduino\\libraries",
+  "runtime.ide.version": "10607",
+  "sketchLocation": "D:\\VsCode\\7Seg_74H595C"
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\Diego Andrade\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\Diego Andrade\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\eightanaloginputs"
+  },
+  {
+    "Sourcefile": "D:\\VsCode\\7Seg_74H595C\\build\\sketch\\7Seg_74H595C.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "D:\\VsCode\\7Seg_74H595C\\build\\sketch\\Meter.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "D:\\VsCode\\7Seg_74H595C\\build\\sketch\\VAmeter.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "D:\\VsCode\\7Seg_74H595C\\build\\sketch\\buttonDebounce.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]
