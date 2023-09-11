@@ -23,10 +23,5 @@
     "Sourcefile": "D:\\VsCode\\7Seg_74H595C\\build\\sketch\\VAmeter.cpp",
     "Include": "",
     "Includepath": null
-  },
-  {
-    "Sourcefile": "D:\\VsCode\\7Seg_74H595C\\build\\sketch\\buttonDebounce.cpp",
-    "Include": "",
-    "Includepath": null
   }
 ]

@@ -12,7 +12,7 @@ float readPin(int analogPin)
 
 float calculateCurrent(float value)
 {
-    return 1.0;
+    return (value * (adc_reference / 1023.0)) / rshunt_value;
 }
 
 float calculateVoltage(float value)

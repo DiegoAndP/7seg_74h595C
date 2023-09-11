@@ -2,26 +2,71 @@
 #include "Arduino.h"
 #include "Meter.h"
 
+byte numberList[10];
+byte wordAmp[4];
+byte wordVolt[3];
+int _pinOutputState;
+
 float _voltageValue;
 float _currentValue;
 int _valueToDisplay[4];
 bool _isVoltageTwoDigits = false;
+bool isVoltageThreeDigits = false;
 bool _isButtonPressed = false;
-bool _isLongPress = false;
-int _buttonLastState = HIGH;
-unsigned long _bounceDelay = 5;
-unsigned long _currentTime;
 unsigned long _lastTime;
-unsigned long _pressTime;
-unsigned long _releaseTime;
 MeterType _typeOfMeter = VOLT;
 
 Digits::Digits()
 {
 }
 
-void Digits::begin()
+void Digits::begin(LedMode ledMode)
 {
+
+    switch (ledMode)
+    {
+    case COMMON_CATHODE:
+
+        for (int i = 0; i < 10; i++)
+        {
+            numberList[i] = cathodeNumberList[i];
+        }
+
+        for (int i = 0; i < 4; i++)
+        {
+            wordAmp[i] = cathodeWordAmp[i];
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            wordVolt[i] = cathodeWordVolt[i];
+        }
+        _pinOutputState = HIGH;
+
+        break;
+
+    case COMMON_ANODE:
+
+        for (int i = 0; i < 10; i++)
+        {
+            numberList[i] = anodeNumberList[i];
+        }
+
+        for (int i = 0; i < 4; i++)
+        {
+            wordAmp[i] = anodeWordAmp[i];
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            wordVolt[i] = anodeWordVolt[i];
+        }
+        _pinOutputState = LOW;
+
+    default:
+        break;
+    }
+
     const int pinList[] = {dataPin, latchPin, clockPin, segPoint};
 
     for (int i = 0; i < 4; i++)
@@ -32,6 +77,7 @@ void Digits::begin()
     {
         pinMode(digitOrder[i], OUTPUT);
     }
+
     pinMode(buttonPin, INPUT);
 }
 
@@ -41,44 +87,34 @@ void Digits::putValues(float voltageValue, float currentValue)
     _currentValue = currentValue;
 }
 
-void Digits::toggleMeterType()
-{
-    unsigned long lasTime = _currentTime;
-
-    if (!digitalRead(buttonPin))
-    {
-        if (millis() - _currentTime > 50)
-        {
-            //_buttonState = !_buttonState;
-            displayMeterType(800);
-        }
-    }
-}
-
 void Digits::displayDigits()
 {
     splitDigits();
 
     for (int i = 0; i < 4; i++)
     {
-        if (!_isVoltageTwoDigits && i == 0 && _typeOfMeter == VOLT | AMP)
+        if (!_isVoltageTwoDigits && i == 0 && _typeOfMeter == VOLT | AMP | WATT && !isVoltageThreeDigits)
         {
-            digitalWrite(segPoint, HIGH);
+            digitalWrite(segPoint, _pinOutputState);
         }
-        else if (_isVoltageTwoDigits && i == 1 && _typeOfMeter == VOLT | AMP)
+        else if (_isVoltageTwoDigits && i == 1 && _typeOfMeter == VOLT | AMP | WATT)
         {
-            digitalWrite(segPoint, HIGH);
+            digitalWrite(segPoint, _pinOutputState);
+        }
+        else if (isVoltageThreeDigits && i == 2 && _typeOfMeter == WATT)
+        {
+            digitalWrite(segPoint, _pinOutputState);
         }
 
         else
         {
-            digitalWrite(segPoint, LOW);
+            digitalWrite(segPoint, !_pinOutputState);
         }
 
-        digitalWrite(digitOrder[i], HIGH);
+        digitalWrite(digitOrder[i], _pinOutputState);
         shiftOut(dataPin, clockPin, MSBFIRST, numberList[_valueToDisplay[i]]);
-        refreshDigits(20);
-        digitalWrite(digitOrder[i], LOW);
+        refreshDigits(10);
+        digitalWrite(digitOrder[i], !_pinOutputState);
     }
 }
 
@@ -89,6 +125,7 @@ void Digits::displayDigits()
 void Digits::splitDigits()
 {
     unsigned int valueToInt;
+    float wattValue = _voltageValue * _currentValue;
 
     switch (_typeOfMeter)
     {
@@ -106,7 +143,7 @@ void Digits::splitDigits()
         break;
 
     case AMP:
-        if (_currentValue < 1.0)
+        if (_currentValue < 9.99)
         {
             valueToInt = _currentValue * 1000;
             _isVoltageTwoDigits = false;
@@ -118,8 +155,26 @@ void Digits::splitDigits()
         }
         break;
     case WATT:
-        valueToInt = (_currentValue * _voltageValue) * 100;
-        _isVoltageTwoDigits = false;
+
+        if (wattValue < 9.99)
+        {
+
+            valueToInt = wattValue * 1000;
+            _isVoltageTwoDigits = false;
+        }
+        else if (wattValue > 9.99 && wattValue < 99.99)
+        {
+            valueToInt = wattValue * 100;
+            _isVoltageTwoDigits = true;
+        }
+        else
+        {
+            valueToInt = wattValue * 10;
+            _isVoltageTwoDigits = false;
+            isVoltageThreeDigits = true;
+        }
+        break;
+    default:
         break;
     }
 
@@ -131,29 +186,26 @@ void Digits::splitDigits()
 
 void Digits::refreshDigits(int delayTime)
 {
-    digitalWrite(latchPin, HIGH);
-    delay(delayTime);
+    unsigned long lastTime = millis();
+    while (millis() - lastTime < delayTime)
+    {
+        digitalWrite(latchPin, HIGH);
+    }
     digitalWrite(latchPin, LOW);
 }
 
-void Digits::displayMeterType(long delayTime)
+void Digits::showWord(byte list[], int size)
 {
-}
-
-void Digits::showWord(const byte list[])
-{
-    int size = sizeof(list);
-
     for (int i = 0; i < size; i++)
     {
-        digitalWrite(digitOrder[i], HIGH);
+        digitalWrite(digitOrder[i], _pinOutputState);
         shiftOut(dataPin, clockPin, MSBFIRST, list[i]);
-        refreshDigits(30);
-        digitalWrite(digitOrder[i], LOW);
+        refreshDigits(10);
+        digitalWrite(digitOrder[i], !_pinOutputState);
     }
 }
 
-void Digits::showOnLongPress()
+void Digits::selectMeter()
 {
     if (digitalRead(buttonPin) == LOW && !_isButtonPressed)
     {
@@ -173,12 +225,10 @@ void Digits::showOnLongPress()
             {
             case WATT:
                 _typeOfMeter = VOLT;
-                Serial.println("REturn form WATTS To VOLTS");
                 break;
 
             default:
                 _typeOfMeter = WATT;
-                Serial.println("MOVE FROM WATHEVER TO WATTS");
                 break;
             }
         }
@@ -192,8 +242,8 @@ void Digits::showOnLongPress()
 
                 do
                 {
-                    showWord(wordAmp);
-                } while (millis() - time < 1500);
+                    showWord(wordAmp, 4);
+                } while (millis() - time < 1000);
                 break;
 
             case AMP:
@@ -202,8 +252,8 @@ void Digits::showOnLongPress()
 
                 do
                 {
-                    showWord(wordVolt);
-                } while (millis() - time < 1500);
+                    showWord(wordVolt, 3);
+                } while (millis() - time < 1000);
 
                 break;
             default:

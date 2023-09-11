@@ -11,39 +11,46 @@ extern const int clockPin;
 extern const int buttonPin;
 extern const int digitOrder[];
 
-extern const byte numberList[];
-extern const byte wordAmp[];
-extern const byte wordVolt[]; 
+const byte cathodeNumberList[10] = {63, 6, 91, 79, 102, 109, 125, 7, 127, 111}; // 0b00111111, 0b00000110, 0b01011011, 0b01001111, 0b01100110, 0b01101101, 0b01111101, 0b00000111, 0b01111111, 0b01101111
+const byte anodeNumberList[10] = {64, 121, 36, 48, 25, 18, 2, 120, 0, 16};      // 0b01000000, 0b01111001, 0b00100100, 0b00110000, 0b00011001, 0b00010010, 0b00000010, 0b01111000, 0b00000000, 0b00010000
+const byte cathodeWordAmp[4] = {119, 84, 68, 115};                              // 0b01110111, 0b01010100, 0b01000100, 0b01110011
+const byte anodeWordAmp[4] = {8, 43, 59, 116};                                  // 0b00001000, 0b00101011, 0b00111011, 0b01110100
+const byte cathodeWordVolt[3] = {62, 92, 56};
+const byte anodeWordVolt[3] = {65, 35, 71}; // 0b01000001, 0b00100011, 0b01000111
 
-enum MeterType {
+enum MeterType
+{
         VOLT,
         AMP,
         WATT
 };
 
+enum LedMode
+{
+        COMMON_CATHODE,
+        COMMON_ANODE
+};
 
 class Digits
 {
 public:
         Digits();
-        void begin();
+        void begin(LedMode ledMode);
         void putValues(float voltageValue, float currentValue);
-        void toggleMeterType();
         void displayDigits();
-        void showOnLongPress();
+        void selectMeter();
 
 private:
-        int _buttonLastState;
-        bool _isVoltageTwoDigits, _isAmpSelected, _isLongPress, _isButtonActive;
+        int _pinOutputState;
+        byte numberList[10], wordVolt[3], wordAmp[4];
+        bool _isVoltageTwoDigits, _isAmpSelected, _isButtonPressed;
         MeterType _typeOfMeter;
         int _valueToDisplay[4];
         float _voltageValue, _currentValue;
-        unsigned long _currentTime, _lastTime, _pressTime, _releaseTime, _bounceDelay;
+        unsigned long _lastTime;
         void splitDigits();
         void refreshDigits(int delayTime);
-        void showWord(const byte list[]);
-        void displayMeterType(long duration);
-
+        void showWord(byte list[], int size);
 };
 
 #endif

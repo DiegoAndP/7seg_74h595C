@@ -37,8 +37,8 @@ Eg.: Number 1 is stored in digitList[1]
 # 23 "D:\\VsCode\\7Seg_74H595C\\7Seg_74H595C.ino"
 const int dataPin = 2;
 const int latchPin = 3;
-const int segPoint = 5;
 const int clockPin = 4;
+const int segPoint = 5;
 const int buttonPin = 8;
 const int digitOrder[4] = {9, 10, 11, 12}; //1000, 100, 10, 1 in order
 const int voltageReadPin = A0;
@@ -58,9 +58,6 @@ Digits digit;
 float measuredVoltage = 0.0;
 float measuredAmps = 0.0;
 
-const byte numberList[10] = {63, 6, 91, 79, 102, 109, 125, 7, 127, 111};
-const byte wordVolt[3] = {62, 92, 56};
-const byte wordAmp[4] = {119, 84, 68, 115};
 
 /*
 
@@ -71,16 +68,17 @@ const byte wordAmp[4] = {119, 84, 68, 115};
 ==========================================
 
 */
-# 51 "D:\\VsCode\\7Seg_74H595C\\7Seg_74H595C.ino"
+# 48 "D:\\VsCode\\7Seg_74H595C\\7Seg_74H595C.ino"
 const float resistor_r1 = 10000.0;
 const float resistor_r2 = 2000.0;
 const float adc_reference = 5.0;
+const float rshunt_value = 0.22;
 
 void setup()
 {
     Serial.begin(9600);
 
-    digit.begin();
+    digit.begin(COMMON_CATHODE);
 }
 
 void loop()
@@ -88,6 +86,6 @@ void loop()
     measuredVoltage = calculateVoltage(readPin(voltageReadPin));
     measuredAmps = calculateCurrent(readPin(currentReadPin));
     digit.putValues(measuredVoltage, measuredAmps);
-    digit.showOnLongPress();
+    digit.selectMeter();
     digit.displayDigits();
 }
